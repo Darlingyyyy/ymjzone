@@ -208,13 +208,13 @@ function goMain(){document.getElementById('linksPage').classList.remove('visible
 
 // ═══════════ 网易云 ═══════════
 // 替换下面的 PLAYLIST_ID 为你的网易云歌单 ID
-const NETEASE_PLAYLIST_ID = ''; // ← 去网易云歌单页，URL里的 id= 后面的数字
+const NETEASE_PLAYLIST_ID = '5379870137';
 if (NETEASE_PLAYLIST_ID) {
   document.getElementById('neteaseIframe').src =
     `https://music.163.com/outchain/player?type=0&id=${NETEASE_PLAYLIST_ID}&auto=0&height=32`;
 }
 // 替换链接为你的网易云主页
-const NETEASE_USER_ID = ''; // ← 你的网易云用户 ID
+const NETEASE_USER_ID = '4007440679';
 if (NETEASE_USER_ID) {
   document.getElementById('neteaseLink').href =
     `https://music.163.com/#/user/home?id=${NETEASE_USER_ID}`;
