@@ -7,16 +7,16 @@
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
-    background: #0c0c14;
-    color: #c8c8d8;
+    background: #0c0c14; color: #c8c8d8;
     font-family: -apple-system, 'PingFang SC', 'Noto Sans SC', system-ui, sans-serif;
     min-height: 100vh; overflow: hidden;
-    -webkit-font-smoothing: antialiased;
+    -webkit-font-smoothing: antialiased; cursor: default;
   }
-  canvas#bg { position: fixed; top: 0; left: 0; z-index: 0; pointer-events: none; }
+  canvas#bg { position: fixed; top: 0; left: 0; z-index: 0; }
+  canvas#rippleCanvas { position: fixed; top: 0; left: 0; z-index: 1; pointer-events: none; }
 
   .loading {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 100;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 200;
     display: flex; align-items: center; justify-content: center;
     background: #0c0c14; transition: opacity 0.6s;
   }
@@ -27,8 +27,8 @@
 
   .center-stage {
     position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    text-align: center; z-index: 90; transition: all 1s cubic-bezier(0.4,0,0.2,1);
-    filter: blur(0); opacity: 1;
+    text-align: center; z-index: 150;
+    transition: all 1s cubic-bezier(0.4,0,0.2,1); filter: blur(0); opacity: 1;
   }
   .center-stage.init { opacity: 0; }
   .center-stage.dissolve { filter: blur(30px); opacity: 0; transition: all 0.8s cubic-bezier(0.4,0,0.2,1); }
@@ -36,52 +36,155 @@
   .name-big { font-size: 28px; font-weight: 600; color: #e8e8f4; letter-spacing: 6px; }
 
   .main-page {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 80;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 100;
     opacity: 0; transition: opacity 0.6s 0.3s; pointer-events: none;
   }
   .main-page.visible { opacity: 1; pointer-events: auto; }
 
-  .header {
-    position: absolute; top: 32px; left: 32px;
-    display: flex; align-items: center; gap: 14px;
+  /* ── 顶栏 ── */
+  .top-bar {
+    position: absolute; top: 28px; left: 28px; right: 28px;
+    display: flex; align-items: center; justify-content: space-between;
   }
-  .avatar-sm { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.06); background: #1a1a28; }
-  .name-sm { font-size: 16px; font-weight: 600; color: #d0d0e0; letter-spacing: 2px; }
+  .top-left { display: flex; align-items: center; gap: 12px; }
+  .avatar-sm { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.06); background: #1a1a28; }
+  .name-sm { font-size: 15px; font-weight: 600; color: #d0d0e0; letter-spacing: 2px; }
+  .rain-toggle {
+    background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 20px; color: #5a5a72; padding: 6px 14px; font-size: 12px;
+    cursor: pointer; letter-spacing: 1px; transition: all 0.3s; font-family: inherit;
+  }
+  .rain-toggle:hover { color: #a0a0b8; border-color: rgba(255,255,255,0.1); }
+  .rain-toggle.on { color: #8a8ab0; }
 
-  .modules {
-    position: absolute; bottom: 40px; left: 32px; right: 32px;
-    display: flex; gap: 12px;
+  /* ── 进度条 ── */
+  .progress-bar-wrap {
+    position: absolute; top: 84px; left: 28px; right: 28px;
+    height: 2px; background: rgba(255,255,255,0.04); border-radius: 1px;
   }
-  .mod-card {
+  .progress-bar-fill {
+    height: 100%; background: rgba(160,170,200,0.25); border-radius: 1px;
+    transition: width 0.8s;
+  }
+  .progress-label {
+    position: absolute; right: 0; top: -20px;
+    font-size: 10px; color: #3c3c52; letter-spacing: 1px;
+  }
+
+  /* ── 内容区 ── */
+  .content-grid {
+    position: absolute; top: 110px; left: 28px; right: 28px; bottom: 100px;
+    display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
+    gap: 10px;
+  }
+  .card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 16px; padding: 16px;
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    overflow: hidden; display: flex; flex-direction: column;
+  }
+  .card-title {
+    font-size: 9px; letter-spacing: 2px; color: #4a4a60;
+    text-transform: uppercase; margin-bottom: 10px; flex-shrink: 0;
+  }
+  .card-body { flex: 1; overflow-y: auto; font-size: 11px; color: #6a6a80; line-height: 1.6; }
+  .card-body::-webkit-scrollbar { width: 2px; }
+  .card-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.04); border-radius: 1px; }
+
+  /* ── 心情 ── */
+  .mood-grid { display: flex; gap: 6px; flex-wrap: wrap; }
+  .mood-day {
+    flex: 1; min-width: 30px; text-align: center;
+    padding: 6px 2px; border-radius: 10px; cursor: pointer;
+    transition: all 0.2s; font-size: 16px;
+  }
+  .mood-day:hover { background: rgba(255,255,255,0.04); }
+  .mood-day .day-label { font-size: 9px; color: #3c3c52; margin-top: 4px; }
+  .mood-picker { display: flex; gap: 6px; margin-top: 8px; justify-content: center; }
+  .mood-picker span { cursor: pointer; font-size: 18px; padding: 4px; border-radius: 8px; transition: all 0.2s; }
+  .mood-picker span:hover { background: rgba(255,255,255,0.06); }
+
+  /* ── 相册 ── */
+  .photos { display: flex; gap: 6px; flex-wrap: wrap; }
+  .photos img {
+    width: calc(33.33% - 4px); aspect-ratio: 1; object-fit: cover;
+    border-radius: 10px; opacity: 0.7; transition: all 0.3s; cursor: pointer;
+  }
+  .photos img:hover { opacity: 1; transform: scale(1.03); }
+
+  /* ── 日志 ── */
+  .log-item { padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.02); }
+  .log-item:last-child { border: none; }
+  .log-date { font-size: 9px; color: #33334a; margin-bottom: 2px; }
+
+  /* ── 正在听 ── */
+  .track-item {
+    display: flex; align-items: center; gap: 10px; padding: 6px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.02);
+  }
+  .track-item:last-child { border: none; }
+  .track-cover { width: 32px; height: 32px; border-radius: 6px; background: #1a1a28; object-fit: cover; }
+  .track-name { font-size: 11px; color: #9090a8; }
+  .track-artist { font-size: 9px; color: #4a4a60; }
+
+  /* ── 底部 ── */
+  .bottom-bar {
+    position: absolute; bottom: 24px; left: 28px; right: 28px;
+    display: flex; gap: 10px;
+  }
+  .bottom-card {
     flex: 1;
     background: rgba(255,255,255,0.022);
     border: 1px solid rgba(255,255,255,0.04);
-    border-radius: 14px; padding: 18px;
+    border-radius: 14px; padding: 14px 18px;
     backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
     transition: all 0.3s;
   }
-  .mod-card.clickable { cursor: pointer; }
-  .mod-card.clickable:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
-  .mod-card .mc-icon { font-size: 18px; margin-bottom: 6px; }
-  .mod-card .mc-label { font-size: 10px; letter-spacing: 2px; color: #5a5a72; margin-bottom: 4px; }
-  .mod-card .mc-content { font-size: 12px; color: #7878a0; line-height: 1.4; }
+  .bottom-card.clickable { cursor: pointer; }
+  .bottom-card.clickable:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
+  .bottom-card .bc-icon { font-size: 16px; margin-bottom: 4px; }
+  .bottom-card .bc-label { font-size: 10px; letter-spacing: 2px; color: #5a5a72; }
+  .bottom-card .bc-content { font-size: 12px; color: #7878a0; margin-top: 2px; }
 
+  /* ── 漂流瓶 ── */
+  .bottle {
+    position: fixed; z-index: 90; pointer-events: none;
+    font-size: 11px; color: rgba(180,180,200,0.3);
+    animation: drift linear infinite; white-space: nowrap;
+  }
+  @keyframes drift {
+    0% { transform: translateX(0) translateY(0); opacity: 1; }
+    80% { opacity: 0.6; }
+    100% { transform: translateX(-200px) translateY(-60px); opacity: 0; }
+  }
+
+  /* ── 涟漪 ── */
+  .ripple {
+    position: absolute; border-radius: 50%;
+    border: 1px solid rgba(160,175,200,0.3);
+    animation: rippleOut 1.2s ease-out forwards;
+    pointer-events: none;
+  }
+  @keyframes rippleOut {
+    0% { width: 0; height: 0; opacity: 0.6; }
+    100% { width: 60px; height: 60px; opacity: 0; margin-left: -30px; margin-top: -30px; }
+  }
+
+  /* ── 链接页 ── */
   .links-page {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 85;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 180;
     display: flex; align-items: center; justify-content: center;
     opacity: 0; visibility: hidden; transition: all 0.5s;
   }
   .links-page.visible { opacity: 1; visibility: visible; }
   .links-container { width: 340px; max-width: 90vw; display: flex; flex-direction: column; gap: 8px; }
   .link-card {
-    display: flex; align-items: center; gap: 14px;
-    padding: 15px 20px; border-radius: 14px;
-    background: rgba(255,255,255,0.025);
+    display: flex; align-items: center; gap: 14px; padding: 15px 20px;
+    border-radius: 14px; background: rgba(255,255,255,0.025);
     border: 1px solid rgba(255,255,255,0.04);
-    text-decoration: none; color: #b0b0c8;
-    font-size: 14px; letter-spacing: 0.5px;
-    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-    transition: all 0.25s;
+    text-decoration: none; color: #b0b0c8; font-size: 14px;
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); transition: all 0.25s;
   }
   .link-card:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); color: #d0d0e0; }
   .link-card .lc-icon { font-size: 20px; width: 28px; text-align: center; }
@@ -89,14 +192,15 @@
   .back-link { color: #48485c; font-size: 12px; letter-spacing: 2px; cursor: pointer; text-align: center; margin-top: 20px; transition: color 0.3s; }
   .back-link:hover { color: #8a8aa2; }
 
-  @media (max-width: 600px) {
-    .header { top: 24px; left: 20px; }
-    .modules { bottom: 24px; left: 20px; right: 20px; flex-direction: column; }
+  @media (max-width: 768px) {
+    .content-grid { grid-template-columns: 1fr; grid-template-rows: auto; }
+    .photos img { width: calc(50% - 4px); }
   }
 </style>
 </head>
 <body>
 <canvas id="bg"></canvas>
+<canvas id="rippleCanvas"></canvas>
 
 <div class="loading" id="loading">
   <div class="loading-bar"><div class="loading-bar-fill" id="loadFill"></div></div>
@@ -108,25 +212,83 @@
 </div>
 
 <div class="main-page" id="mainPage">
-  <div class="header">
-    <img class="avatar-sm" src="YMJ.jpg" alt="YMJ">
-    <span class="name-sm">YMJ</span>
+  <!-- 顶栏 -->
+  <div class="top-bar">
+    <div class="top-left">
+      <img class="avatar-sm" src="YMJ.jpg" alt="YMJ">
+      <span class="name-sm">YMJ</span>
+    </div>
+    <button class="rain-toggle on" id="rainToggle" onclick="toggleRainSound()">🔊 雨声</button>
   </div>
 
-  <div class="modules">
-    <div class="mod-card">
-      <div class="mc-icon">☁️</div>
-      <div class="mc-label">状态</div>
-      <div class="mc-content">—</div>
+  <!-- 进度条 -->
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="progressFill"></div>
+    <div class="progress-label" id="progressLabel"></div>
+  </div>
+
+  <!-- 内容四宫格 -->
+  <div class="content-grid">
+    <!-- 心情晴雨表 -->
+    <div class="card">
+      <div class="card-title">🌙 心情</div>
+      <div class="card-body">
+        <div class="mood-grid" id="moodGrid"></div>
+        <div class="mood-picker" id="moodPicker"></div>
+      </div>
     </div>
-    <div class="mod-card clickable" onclick="goLinks()">
-      <div class="mc-icon">🔗</div>
-      <div class="mc-label">找到我</div>
-      <div class="mc-content">各平台 →</div>
+
+    <!-- 碎片相册 -->
+    <div class="card">
+      <div class="card-title">📸 碎片</div>
+      <div class="card-body photos" id="photos">
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect fill='%231a1a28' width='100' height='100'/%3E%3Ctext fill='%233c3c52' x='50' y='55' text-anchor='middle' font-size='20'%3E🌧%3C/text%3E%3C/svg%3E" alt="占位">
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect fill='%231a1a28' width='100' height='100'/%3E%3Ctext fill='%233c3c52' x='50' y='55' text-anchor='middle' font-size='20'%3E☁️%3C/text%3E%3C/svg%3E" alt="占位">
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect fill='%231a1a28' width='100' height='100'/%3E%3Ctext fill='%233c3c52' x='50' y='55' text-anchor='middle' font-size='20'%3E🎮%3C/text%3E%3C/svg%3E" alt="占位">
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect fill='%231a1a28' width='100' height='100'/%3E%3Ctext fill='%233c3c52' x='50' y='55' text-anchor='middle' font-size='20'%3E🌅%3C/text%3E%3C/svg%3E" alt="占位">
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect fill='%231a1a28' width='100' height='100'/%3E%3Ctext fill='%233c3c52' x='50' y='55' text-anchor='middle' font-size='20'%3E🍜%3C/text%3E%3C/svg%3E" alt="占位">
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect fill='%231a1a28' width='100' height='100'/%3E%3Ctext fill='%233c3c52' x='50' y='55' text-anchor='middle' font-size='20'%3E🏠%3C/text%3E%3C/svg%3E" alt="占位">
+      </div>
+    </div>
+
+    <!-- 一句话日志 -->
+    <div class="card">
+      <div class="card-title">📝 记录</div>
+      <div class="card-body" id="logList">
+        <div class="log-item"><div class="log-date">06.22</div>把网站又改了一遍，这次加了很多东西。</div>
+        <div class="log-item"><div class="log-date">06.21</div>下雨天在展厅调灯光，2700K 刚好。</div>
+        <div class="log-item"><div class="log-date">06.18</div>朋友说我这网站挺安静的，我说嗯，就是安静。</div>
+      </div>
+    </div>
+
+    <!-- 正在听 -->
+    <div class="card">
+      <div class="card-title">🎧 正在听</div>
+      <div class="card-body" id="trackList">
+        <div class="track-item">
+          <div class="track-cover" style="background:#1a1a28;"></div>
+          <div><div class="track-name">加载中…</div><div class="track-artist">—</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 底部 -->
+  <div class="bottom-bar">
+    <div class="bottom-card">
+      <div class="bc-icon">☁️</div>
+      <div class="bc-label">状态</div>
+      <div class="bc-content">—</div>
+    </div>
+    <div class="bottom-card clickable" onclick="goLinks()">
+      <div class="bc-icon">🔗</div>
+      <div class="bc-label">找到我</div>
+      <div class="bc-content">各平台 →</div>
     </div>
   </div>
 </div>
 
+<!-- 链接页 -->
 <div class="links-page" id="linksPage">
   <div>
     <div class="links-container">
@@ -141,11 +303,13 @@
 </div>
 
 <script>
-// ═══════════ 背景 ═══════════
+// ═══════════ 背景：云 + 雨 ═══════════
 const bgC=document.getElementById('bg'),ctx=bgC.getContext('2d');
+const ripC=document.getElementById('rippleCanvas'),rctx=ripC.getContext('2d');
 let w,h,rainI=0.7;
-function resize(){w=bgC.width=innerWidth;h=bgC.height=innerHeight}
+function resize(){w=bgC.width=ripC.width=innerWidth;h=bgC.height=ripC.height=innerHeight}
 resize();addEventListener('resize',resize);
+
 class Cloud{
   constructor(){this.reset(true)}
   reset(init){this.x=init?Math.random()*w:w+200;this.y=Math.random()*h*.35;this.w=100+Math.random()*180;this.h=30+Math.random()*50;this.speed=.1+Math.random()*.3;this.a=.02+Math.random()*.05}
@@ -161,51 +325,117 @@ class RainDrop{
 const clouds=Array.from({length:10},()=>new Cloud),allRain=Array.from({length:200},()=>new RainDrop);
 (function L(){ctx.clearRect(0,0,w,h);clouds.forEach(c=>{c.update();c.draw()});allRain.forEach(r=>{r.update();r.draw()});requestAnimationFrame(L)})();
 
-// ═══════════ 雨声音频 ═══════════
+// ═══════════ 点击雨滴 — 涟漪 ═══════════
+ripC.addEventListener('click',e=>{
+  const div=document.createElement('div');
+  div.className='ripple';
+  div.style.left=e.clientX+'px';div.style.top=e.clientY+'px';
+  document.body.appendChild(div);
+  setTimeout(()=>div.remove(),1200);
+});
+
+// ═══════════ 雨声 ═══════════
 let rainAudio=null,rainPlaying=false;
-function startRainSound() {
-  if (rainPlaying) return;
-  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-  // 创建雨声：多层噪声 + 滤波
-  function createRainLayer(type, low, high, vol) {
-    const buf = audioCtx.createBuffer(1, audioCtx.sampleRate * 2, audioCtx.sampleRate);
-    const data = buf.getChannelData(0);
-    for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * vol;
-    const src = audioCtx.createBufferSource();
-    src.buffer = buf; src.loop = true;
-    const filter = audioCtx.createBiquadFilter();
-    filter.type = 'bandpass'; filter.frequency.value = (low + high) / 2;
-    filter.Q.value = (low + high) / 2 / (high - low);
-    const gain = audioCtx.createGain();
-    gain.gain.value = vol * 0.15;
-    src.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
-    src.start();
-    return { src, filter, gain };
-  }
-
-  // 低频（远处闷雷/大雨背景）
-  createRainLayer('brown', 80, 400, 1.0);
-  // 中频（雨滴声主体）
-  createRainLayer('pink', 300, 2000, 0.7);
-  // 高频（细密雨声）
-  createRainLayer('white', 1500, 6000, 0.35);
-  // 低频滴答
-  createRainLayer('brown', 40, 200, 0.5);
-
-  rainPlaying = true;
+function startRainSound(){
+  if(rainPlaying)return;
+  const ac=new(window.AudioContext||window.webkitAudioContext)();
+  function layer(l,h,v){const b=ac.createBuffer(1,ac.sampleRate*2,ac.sampleRate);const d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*v;const s=ac.createBufferSource();s.buffer=b;s.loop=true;const f=ac.createBiquadFilter();f.type='bandpass';f.frequency.value=(l+h)/2;f.Q.value=(l+h)/2/(h-l);const g=ac.createGain();g.gain.value=v*.15;s.connect(f);f.connect(g);g.connect(ac.destination);s.start();return{s,f,g}}
+  layer(80,400,1);layer(300,2000,.7);layer(1500,6000,.35);layer(40,200,.5);
+  rainPlaying=true;
 }
+function toggleRainSound(){
+  const btn=document.getElementById('rainToggle');
+  if(rainPlaying){
+    rainPlaying=false;btn.textContent='🔇 静音';btn.classList.remove('on');
+  }else{
+    rainPlaying=true;btn.textContent='🔊 雨声';btn.classList.add('on');
+    startRainSound();
+  }
+}
+
+// ═══════════ 进度条 ═══════════
+function updateProgress(){
+  const now=new Date();
+  const start=new Date(now.getFullYear(),0,1);
+  const end=new Date(now.getFullYear()+1,0,1);
+  const pct=((now-start)/(end-start)*100).toFixed(1);
+  document.getElementById('progressFill').style.width=pct+'%';
+  document.getElementById('progressLabel').textContent=now.getFullYear()+' · '+pct+'%';
+}
+updateProgress();
+
+// ═══════════ 心情晴雨表 ═══════════
+const moods=['☀️','⛅','☁️','🌧','⛈','🌈','😶','😊','😢','😤','😴','💀'];
+function buildMood(){
+  const grid=document.getElementById('moodGrid');
+  const picker=document.getElementById('moodPicker');
+  const stored=JSON.parse(localStorage.getItem('ymj_moods')||'{}');
+  const days=['日','一','二','三','四','五','六'];
+  let html='';
+  for(let i=6;i>=0;i--){
+    const d=new Date();d.setDate(d.getDate()-i);
+    const key=d.toISOString().slice(0,10);
+    const mood=stored[key]||'·';
+    html+=`<div class="mood-day" onclick="setMood('${key}')"><div>${mood}</div><div class="day-label">${days[d.getDay()]}</div></div>`;
+  }
+  grid.innerHTML=html;
+  picker.innerHTML=moods.map(m=>`<span onclick="pickMood('${m}')">${m}</span>`).join('');
+}
+let pickTarget='';
+function setMood(key){pickTarget=key}
+function pickMood(m){
+  if(!pickTarget)return;
+  const stored=JSON.parse(localStorage.getItem('ymj_moods')||'{}');
+  stored[pickTarget]=m;
+  localStorage.setItem('ymj_moods',JSON.stringify(stored));
+  pickTarget='';buildMood();
+}
+buildMood();
+
+// ═══════════ 漂流瓶 ═══════════
+const bottles=[
+  '雨很好看。','我也是INFP。','安静的地方真好。','南京也想你了。',
+  '今天什么都没发生，但挺好的。','看到这个网站突然想哭。','加油。'
+];
+function spawnBottle(){
+  const b=document.createElement('div');
+  b.className='bottle';
+  b.textContent='💬 '+bottles[Math.floor(Math.random()*bottles.length)];
+  b.style.left=Math.random()*80+10+'%';
+  b.style.top=Math.random()*60+20+'%';
+  b.style.animationDuration=10+Math.random()*15+'s';
+  document.body.appendChild(b);
+  setTimeout(()=>b.remove(),26000);
+}
+setInterval(spawnBottle,5000+Math.random()*5000);
+spawnBottle();
+
+// ═══════════ 正在听（尝试网易云 API）═══════════
+fetch('https://api.allorigins.win/raw?url='+encodeURIComponent('https://api.imjad.cn/cloudmusic/?type=user_record&uid=4007440679&type=1'))
+  .then(r=>r.json()).then(d=>{
+    if(d.weekData&&d.weekData.length){
+      const list=document.getElementById('trackList');
+      list.innerHTML=d.weekData.slice(0,6).map(t=>`
+        <div class="track-item">
+          <img class="track-cover" src="${t.song.album.picUrl||''}" onerror="this.style.background='#1a1a28'">
+          <div><div class="track-name">${t.song.name}</div><div class="track-artist">${t.song.ar.map(a=>a.name).join('/')}</div></div>
+        </div>`).join('');
+    }
+  }).catch(()=>{
+    document.getElementById('trackList').innerHTML=`
+      <div class="track-item"><div class="track-cover" style="background:#1a1a28;"></div><div><div class="track-name">最近一周</div><div class="track-artist">去网易云看吧 →</div></div></div>`;
+  });
 
 // ═══════════ 入场动画 ═══════════
 window.addEventListener('load',()=>{
-  const lf=document.getElementById('loadFill');
-  const ld=document.getElementById('loading');
-  const st=document.getElementById('centerStage');
-  const mp=document.getElementById('mainPage');
+  const lf=document.getElementById('loadFill'),ld=document.getElementById('loading');
+  const st=document.getElementById('centerStage'),mp=document.getElementById('mainPage');
   setTimeout(()=>lf.classList.add('active'),200);
   setTimeout(()=>{ld.classList.add('done');st.classList.remove('init');st.style.transition='opacity 0.8s ease';st.style.opacity='1'},1600);
   setTimeout(()=>{st.classList.add('dissolve');startRainSound()},3000);
   setTimeout(()=>{st.style.display='none';mp.classList.add('visible')},3900);
+  // 初始化漂流瓶
+  for(let i=0;i<3;i++)setTimeout(spawnBottle,i*2000);
 });
 
 function goLinks(){document.getElementById('mainPage').classList.remove('visible');document.getElementById('linksPage').classList.add('visible')}
