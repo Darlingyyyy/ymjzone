@@ -15,31 +15,63 @@
   }
   canvas#bg { position: fixed; top: 0; left: 0; z-index: 0; pointer-events: none; }
 
-  .stage { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+  /* ═══════════ 页面容器 ═══════════ */
+  .page {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1; transition: opacity 0.6s ease, visibility 0.6s;
+  }
+  .page.hidden {
+    opacity: 0; visibility: hidden; pointer-events: none;
+  }
 
-  /* ── 中心：头像 + 名字 ── */
+  /* ═══════════ 主页：极简 ═══════════ */
+  .home-content { text-align: center; }
+  .avatar {
+    width: 88px; height: 88px; border-radius: 50%;
+    object-fit: cover; margin-bottom: 18px;
+    border: 1.5px solid rgba(255,255,255,0.06);
+    background: #1a1a28;
+  }
+  .name { font-size: 24px; font-weight: 600; color: #dfdfec; letter-spacing: 5px; margin-bottom: 6px; }
+  .sub { font-size: 11px; color: #3c3c52; letter-spacing: 3px; margin-bottom: 28px; }
+  .enter-btn {
+    background: transparent; border: 1px solid rgba(255,255,255,0.08);
+    color: #5a5a72; padding: 10px 28px; border-radius: 24px;
+    font-size: 12px; letter-spacing: 3px; cursor: pointer;
+    transition: all 0.3s; font-family: inherit;
+  }
+  .enter-btn:hover {
+    border-color: rgba(255,255,255,0.18);
+    color: #9a9ab0;
+  }
+
+  /* ═══════════ 第二页：模块 ═══════════ */
+  .stage { width: 100%; height: 100%; position: relative; }
+  .back-btn {
+    position: absolute; top: 24px; left: 24px;
+    background: transparent; border: none; color: #3c3c52;
+    font-size: 12px; letter-spacing: 2px; cursor: pointer;
+    z-index: 30; font-family: inherit; transition: color 0.3s;
+  }
+  .back-btn:hover { color: #8a8aa2; }
+
   .center {
     position: absolute; top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     text-align: center; z-index: 10;
   }
-  .avatar {
-    width: 80px; height: 80px; border-radius: 50%;
-    object-fit: cover; margin-bottom: 14px;
-    border: 1.5px solid rgba(255,255,255,0.08);
-    background: #1a1a28; display: block; margin: 0 auto;
-  }
-  .name { font-size: 22px; font-weight: 600; color: #dfdfec; letter-spacing: 4px; }
+  .center .avatar { width: 64px; height: 64px; margin-bottom: 10px; }
+  .center .name { font-size: 18px; letter-spacing: 3px; }
 
-  /* ── 分支卡片 ── */
   .branch {
     position: absolute;
-    background: rgba(255,255,255,0.025);
-    border: 1px solid rgba(255,255,255,0.05);
-    border-radius: 16px; padding: 14px 18px;
+    background: rgba(255,255,255,0.022);
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 14px; padding: 12px 16px;
     backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-    transition: all 0.4s; cursor: default; z-index: 5;
-    max-width: 240px;
+    transition: all 0.35s; cursor: default; z-index: 5;
+    max-width: 220px;
   }
   .branch.clickable { cursor: pointer; }
   .branch.clickable:hover {
@@ -47,21 +79,20 @@
     border-color: rgba(255,255,255,0.1);
     z-index: 20;
   }
-  .branch .br-icon { font-size: 16px; margin-bottom: 4px; }
-  .branch .br-label { font-size: 11px; letter-spacing: 2px; color: #5a5a72; margin-bottom: 3px; }
-  .branch .br-content { font-size: 12px; color: #787898; line-height: 1.5; }
+  .branch .br-icon { font-size: 15px; margin-bottom: 3px; }
+  .branch .br-label { font-size: 10px; letter-spacing: 2px; color: #5a5a72; margin-bottom: 2px; }
+  .branch .br-content { font-size: 11px; color: #6a6a82; line-height: 1.4; }
 
-  /* 各分支定位 */
-  .br-status  { top: 6%; left: 50%; transform: translate(-50%,0); text-align: center; }
-  .br-quote   { top: 18%; left: 50%; transform: translate(-50%,0); text-align: center; max-width: 340px; }
-  .br-game    { top: 30%; right: 4%; }
-  .br-about   { top: 30%; left: 4%; }
-  .br-rain    { bottom: 22%; left: 50%; transform: translate(-50%,0); text-align: center; }
-  .br-play    { bottom: 30%; right: 4%; }
-  .br-chat    { bottom: 6%; right: 4%; width: 220px; }
-  .br-guest   { bottom: 6%; left: 4%; width: 220px; }
+  .br-status  { top: 4%; left: 50%; transform: translate(-50%,0); text-align: center; }
+  .br-quote   { top: 16%; left: 50%; transform: translate(-50%,0); text-align: center; max-width: 340px; }
+  .br-game    { top: 28%; right: 3%; }
+  .br-about   { top: 28%; left: 3%; }
+  .br-rain    { bottom: 20%; left: 50%; transform: translate(-50%,0); text-align: center; }
+  .br-play    { bottom: 28%; right: 3%; }
+  .br-chat    { bottom: 5%; right: 3%; width: 200px; }
+  .br-guest   { bottom: 5%; left: 3%; width: 200px; }
 
-  /* ── 弹窗 ── */
+  /* ═══════════ 弹窗 ═══════════ */
   .modal-overlay {
     display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0,0,0,0.55); z-index: 50;
@@ -112,75 +143,81 @@
   }
 
   @media (max-width: 600px) {
-    .branch { max-width: 160px; padding: 10px 12px; }
-    .br-game { right: 2%; top: 26%; }
-    .br-about { left: 2%; top: 26%; }
-    .br-chat { right: 2%; bottom: 6%; width: 160px; }
-    .br-guest { left: 2%; bottom: 6%; width: 160px; }
-    .br-quote { max-width: 280px; }
+    .branch { max-width: 150px; padding: 10px 12px; }
+    .br-game { right: 1%; top: 26%; }
+    .br-about { left: 1%; top: 26%; }
+    .br-chat { right: 1%; bottom: 8%; width: 150px; }
+    .br-guest { left: 1%; bottom: 8%; width: 150px; }
+    .center .avatar { width: 52px; height: 52px; }
+    .center .name { font-size: 16px; }
   }
 </style>
 </head>
 <body>
 <canvas id="bg"></canvas>
 
-<div class="stage">
-  <!-- ═══════ 中心 ═══════ -->
-  <div class="center">
-    <img class="avatar" src="YMJ.jpg" alt="头像">
+<!-- ═══════════ 主页 — 极简 ═══════════ -->
+<div class="page" id="pageHome">
+  <div class="home-content">
+    <img class="avatar" src="YMJ.jpg" alt="YMJ">
     <div class="name">YMJ</div>
-  </div>
-
-  <!-- ═══════ 分支 ═══════ -->
-  <div class="branch br-status">
-    <div class="br-icon">☁️</div>
-    <div class="br-label">状态</div>
-    <div class="br-content">今天也没说什么话，挺好的。</div>
-  </div>
-
-  <div class="branch br-quote">
-    <div class="br-label">「</div>
-    <div class="br-content" id="quoteText">就这样吧，淡淡的走。</div>
-  </div>
-
-  <div class="branch br-game">
-    <div class="br-icon">🎮</div>
-    <div class="br-label">正在玩</div>
-    <div class="br-content">PC 端游，随便打打</div>
-  </div>
-
-  <div class="branch br-about clickable" onclick="openModal('about')">
-    <div class="br-icon">📋</div>
-    <div class="br-label">关于我</div>
-    <div class="br-content">了解 YMJ</div>
-  </div>
-
-  <div class="branch br-rain">
-    <div class="br-icon">🌧</div>
-    <div class="br-label">雨量</div>
-    <input type="range" class="rain-slider" min="0" max="100" value="70" oninput="setRain(this.value)">
-  </div>
-
-  <div class="branch br-play clickable" onclick="togglePlay()">
-    <div class="br-icon">🎵</div>
-    <div class="br-label">Lofi</div>
-    <div class="br-content" id="playLabel">▶ 播放</div>
-  </div>
-
-  <div class="branch br-chat clickable" onclick="openModal('chat')">
-    <div class="br-icon">💬</div>
-    <div class="br-label">聊 天</div>
-    <div class="br-content">跟 YMJ 说点什么…</div>
-  </div>
-
-  <div class="branch br-guest clickable" onclick="openModal('guest')">
-    <div class="br-icon">📝</div>
-    <div class="br-label">留 言</div>
-    <div class="br-content">想说点什么…</div>
+    <div class="sub">就这样吧，淡淡的走。</div>
+    <button class="enter-btn" onclick="goToMain()">进 入</button>
   </div>
 </div>
 
-<!-- ═══════ 弹窗 ═══════ -->
+<!-- ═══════════ 第二页 — 全部模块 ═══════════ -->
+<div class="page hidden" id="pageMain">
+  <button class="back-btn" onclick="goHome()">← 返回</button>
+  <div class="stage">
+    <div class="center">
+      <img class="avatar" src="YMJ.jpg" alt="YMJ">
+      <div class="name">YMJ</div>
+    </div>
+
+    <div class="branch br-status">
+      <div class="br-icon">☁️</div><div class="br-label">状态</div>
+      <div class="br-content">今天也没说什么话，挺好的。</div>
+    </div>
+
+    <div class="branch br-quote">
+      <div class="br-label">「</div>
+      <div class="br-content" id="quoteText">就这样吧，淡淡的走。</div>
+    </div>
+
+    <div class="branch br-game">
+      <div class="br-icon">🎮</div><div class="br-label">正在玩</div>
+      <div class="br-content">PC 端游，随便打打</div>
+    </div>
+
+    <div class="branch br-about clickable" onclick="openModal('about')">
+      <div class="br-icon">📋</div><div class="br-label">关于我</div>
+      <div class="br-content">了解 YMJ</div>
+    </div>
+
+    <div class="branch br-rain">
+      <div class="br-icon">🌧</div><div class="br-label">雨量</div>
+      <input type="range" class="rain-slider" min="0" max="100" value="70" oninput="setRain(this.value)">
+    </div>
+
+    <div class="branch br-play clickable" onclick="togglePlay()">
+      <div class="br-icon">🎵</div><div class="br-label">Lofi</div>
+      <div class="br-content" id="playLabel">▶ 播放</div>
+    </div>
+
+    <div class="branch br-chat clickable" onclick="openModal('chat')">
+      <div class="br-icon">💬</div><div class="br-label">聊 天</div>
+      <div class="br-content">跟 YMJ 说点什么…</div>
+    </div>
+
+    <div class="branch br-guest clickable" onclick="openModal('guest')">
+      <div class="br-icon">📝</div><div class="br-label">留 言</div>
+      <div class="br-content">想说点什么…</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 弹窗 ═══════════ -->
 <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
   <div class="modal" id="modalChat" style="display:none">
     <button class="modal-close" onclick="closeModal()">✕</button>
@@ -219,6 +256,16 @@
 
 <script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.min.js"></script>
 <script>
+// ═══════════ 页面切换 ═══════════
+function goToMain() {
+  document.getElementById('pageHome').classList.add('hidden');
+  document.getElementById('pageMain').classList.remove('hidden');
+}
+function goHome() {
+  document.getElementById('pageMain').classList.add('hidden');
+  document.getElementById('pageHome').classList.remove('hidden');
+}
+
 // ═══════════ 背景 ═══════════
 const bgC=document.getElementById('bg'),ctx=bgC.getContext('2d');
 let w,h,rainI=0.7,targetR=0.7;
@@ -250,7 +297,7 @@ function openModal(t){document.getElementById('modalOverlay').classList.add('sho
 function closeModal(){document.getElementById('modalOverlay').classList.remove('show')}
 
 // ═══════════ AI ═══════════
-function YR(m){const s=m.toLowerCase().trim();if(/你好|嗨|hi/.test(s))return'嗯。';if(/你是谁|你是ymj/.test(s))return'我是 YMJ。';if(/天气|下雨|雨/.test(s))return'我喜欢雨。小时候老家下暴雨，在屋檐下玩，很凉快。';if(/游戏|玩什么|端游/.test(s))return'端游。随便打打。';if(/南京/.test(s))return'我想回去。';if(/生日/.test(s))return'7月24。';if(/几岁|多大/.test(s))return'快 23 了。';if(/mbti|infp/.test(s))return'INFP。';if(/吃|饿|做饭/.test(s))return'会做一点，跟着教程做，不会难吃。';if(/困|累|睡觉/.test(s))return'累了就睡，硬熬没意义。';if(/喜欢|爱/.test(s))return'……不说这个。';if(/哭|伤心/.test(s))return'哭就哭了，没什么。';if(/朋友/.test(s))return'少一点也好。';if(/末日/.test(s))return'就这样吧，淡淡的走。';if(/日本/.test(s))return'想去，还没去。';if(/讨厌|烦/.test(s))return'装的人最烦。还有吧唧嘴。';if(/谢谢/.test(s))return'不用。';if(/安静|舒服/.test(s))return'安静的环境最能恢复。';if(/孤独|一个人/.test(s))return'习惯了。';if(/长大/.test(s))return'累。';if(/杭州湾|宁波/.test(s))return'嗯，在杭州湾。';if(/温柔/.test(s))return'看对谁。';const D=['……','嗯。','不知道说什么。','就这样吧。','随便。','你话还挺多的。','我没什么想说的。'];return D[Math.floor(Math.random()*D.length)]}
+function YR(m){const s=m.toLowerCase().trim();if(/你好|嗨|hi/.test(s))return'嗯。';if(/你是谁|你是ymj/.test(s))return'我是 YMJ。';if(/天气|下雨|雨/.test(s))return'我喜欢雨。小时候老家下暴雨，在屋檐下玩，很凉快。';if(/游戏|玩什么|端游/.test(s))return'端游。随便打打。';if(/南京/.test(s))return'我想回去。';if(/生日/.test(s))return'7月24。';if(/几岁|多大/.test(s))return'快 23 了。';if(/mbti|infp/.test(s))return'INFP。';if(/吃|饿|做饭/.test(s))return'会做一点，跟着教程做，不会难吃。';if(/困|累|睡觉/.test(s))return'累了就睡，硬熬没意义。';if(/喜欢|爱/.test(s))return'……不说这个。';if(/哭|伤心/.test(s))return'哭就哭了，没什么。';if(/朋友/.test(s))return'少一点也好。';if(/末日/.test(s))return'就这样吧，淡淡的走。';if(/日本/.test(s))return'想去，还没去。';if(/讨厌|烦/.test(s))return'装的人最烦。还有吧唧嘴。';if(/谢谢/.test(s))return'不用。';if(/安静|舒服/.test(s))return'安静的环境最能恢复。';if(/孤独|一个人/.test(s))return'习惯了。';if(/长大/.test(s))return'累。';if(/杭州湾|宁波/.test(s))return'嗯，在杭州湾。';if(/温柔/.test(s))return'看对谁。';if(/抽烟/.test(s))return'高中开始的，戒不戒无所谓。';if(/恋爱|对象|前任/.test(s))return'不说这个。';const D=['……','嗯。','不知道说什么。','就这样吧。','随便。','你话还挺多的。'];return D[Math.floor(Math.random()*D.length)]}
 function sendMsg(){const i=document.getElementById('chatInput'),m=i.value.trim();if(!m)return;const c=document.getElementById('chatMsgs');c.innerHTML+=`<div class="m-user">${m}</div>`;i.value='';setTimeout(()=>{c.innerHTML+=`<div class="m-ymj">${YR(m)}</div>`;c.scrollTop=c.scrollHeight},600+Math.random()*1200);c.scrollTop=c.scrollHeight}
 
 // ═══════════ 留言 ═══════════
