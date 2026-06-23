@@ -132,11 +132,11 @@
     <span class="name-sm">YMJ</span>
   </div>
 
-  <!-- 网易云 — 右下角 -->
-  <div class="netease-wrap" id="neteasePlayer">
-    <iframe id="neteaseIframe" frameborder="no" border="0" marginwidth="0" marginheight="0" width="280" height="52"
-      src="about:blank"></iframe>
-  </div>
+  <!-- 网易云跳转按钮 — 右下角 -->
+  <a class="netease-wrap" id="neteasePlayer" href="https://music.163.com/#/playlist?id=5379870137" target="_blank">
+    <span style="font-size:14px;margin-right:6px;">🎧</span>
+    <span style="font-size:11px;letter-spacing:1px;color:#7878a0;">网易云歌单 →</span>
+  </a>
 
   <div class="modules">
     <div class="mod-card">
@@ -206,19 +206,8 @@ window.addEventListener('load',()=>{
 function goLinks(){document.getElementById('mainPage').classList.remove('visible');document.getElementById('linksPage').classList.add('visible')}
 function goMain(){document.getElementById('linksPage').classList.remove('visible');document.getElementById('mainPage').classList.add('visible')}
 
-// ═══════════ 网易云 ═══════════
-// 替换下面的 PLAYLIST_ID 为你的网易云歌单 ID
-const NETEASE_PLAYLIST_ID = '5379870137';
-if (NETEASE_PLAYLIST_ID) {
-  document.getElementById('neteaseIframe').src =
-    `https://music.163.com/outchain/player?type=0&id=${NETEASE_PLAYLIST_ID}&auto=0&height=32`;
-}
-// 替换链接为你的网易云主页
-const NETEASE_USER_ID = '4007440679';
-if (NETEASE_USER_ID) {
-  document.getElementById('neteaseLink').href =
-    `https://music.163.com/#/user/home?id=${NETEASE_USER_ID}`;
-}
+// ═══════════ 网易云链接 ═══════════
+document.getElementById('neteaseLink').href = 'https://music.163.com/#/user/home?id=4007440679';
 </script>
 </body>
 </html>
