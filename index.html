@@ -15,262 +15,208 @@
   }
   canvas#bg { position: fixed; top: 0; left: 0; z-index: 0; pointer-events: none; }
 
-  /* ═══════════ 页面容器 ═══════════ */
-  .page {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  /* ═══════════ 加载页 ═══════════ */
+  .loading {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 100;
     display: flex; align-items: center; justify-content: center;
-    z-index: 1; transition: opacity 0.6s ease, visibility 0.6s;
+    background: #0c0c14; transition: opacity 0.6s;
   }
-  .page.hidden {
-    opacity: 0; visibility: hidden; pointer-events: none;
+  .loading.done { opacity: 0; pointer-events: none; }
+  .loading-bar {
+    width: 200px; height: 1px; background: rgba(255,255,255,0.06);
+    border-radius: 1px; overflow: hidden;
   }
+  .loading-bar-fill {
+    width: 0%; height: 100%; background: rgba(180,180,210,0.4);
+    transition: width 1.2s cubic-bezier(0.25,0.46,0.45,0.94);
+  }
+  .loading-bar-fill.active { width: 100%; }
 
-  /* ═══════════ 主页：极简 ═══════════ */
-  .home-content { text-align: center; }
-  .avatar {
-    width: 88px; height: 88px; border-radius: 50%;
-    object-fit: cover; margin-bottom: 18px;
+  /* ═══════════ 动画阶段：头像居中 ═══════════ */
+  .center-stage {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    text-align: center; z-index: 90; transition: all 1s cubic-bezier(0.4,0,0.2,1);
+    filter: blur(0); opacity: 1;
+  }
+  .center-stage.dissolve {
+    filter: blur(30px); opacity: 0;
+    transition: all 0.8s cubic-bezier(0.4,0,0.2,1);
+  }
+  .avatar-big {
+    width: 120px; height: 120px; border-radius: 50%;
+    object-fit: cover; margin-bottom: 20px;
     border: 1.5px solid rgba(255,255,255,0.06);
     background: #1a1a28;
   }
-  .name { font-size: 24px; font-weight: 600; color: #dfdfec; letter-spacing: 5px; margin-bottom: 6px; }
-  .sub { font-size: 11px; color: #3c3c52; letter-spacing: 3px; margin-bottom: 28px; }
-  .enter-btn {
-    background: transparent; border: 1px solid rgba(255,255,255,0.08);
-    color: #5a5a72; padding: 10px 28px; border-radius: 24px;
-    font-size: 12px; letter-spacing: 3px; cursor: pointer;
-    transition: all 0.3s; font-family: inherit;
-  }
-  .enter-btn:hover {
-    border-color: rgba(255,255,255,0.18);
-    color: #9a9ab0;
-  }
+  .name-big { font-size: 28px; font-weight: 600; color: #e8e8f4; letter-spacing: 6px; }
 
-  /* ═══════════ 第二页：模块 ═══════════ */
-  .stage { width: 100%; height: 100%; position: relative; }
-  .back-btn {
-    position: absolute; top: 24px; left: 24px;
-    background: transparent; border: none; color: #3c3c52;
-    font-size: 12px; letter-spacing: 2px; cursor: pointer;
-    z-index: 30; font-family: inherit; transition: color 0.3s;
+  /* ═══════════ 主页：头像左上角 ═══════════ */
+  .main-page {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 80;
+    opacity: 0; transition: opacity 0.6s 0.3s;
+    pointer-events: none;
   }
-  .back-btn:hover { color: #8a8aa2; }
+  .main-page.visible { opacity: 1; pointer-events: auto; }
 
-  .center {
-    position: absolute; top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center; z-index: 10;
+  .header {
+    position: absolute; top: 32px; left: 32px;
+    display: flex; align-items: center; gap: 14px;
   }
-  .center .avatar { width: 64px; height: 64px; margin-bottom: 10px; }
-  .center .name { font-size: 18px; letter-spacing: 3px; }
+  .avatar-sm {
+    width: 40px; height: 40px; border-radius: 50%;
+    object-fit: cover; border: 1px solid rgba(255,255,255,0.06);
+    background: #1a1a28;
+  }
+  .name-sm { font-size: 16px; font-weight: 600; color: #d0d0e0; letter-spacing: 2px; }
 
-  .branch {
-    position: absolute;
+  /* ── 模块卡片 ── */
+  .modules {
+    position: absolute; bottom: 32px; left: 32px; right: 32px;
+    display: flex; gap: 12px; flex-wrap: wrap;
+  }
+  .mod-card {
+    flex: 1; min-width: 130px;
     background: rgba(255,255,255,0.022);
     border: 1px solid rgba(255,255,255,0.04);
-    border-radius: 14px; padding: 12px 16px;
+    border-radius: 14px; padding: 16px;
     backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-    transition: all 0.35s; cursor: default; z-index: 5;
-    max-width: 220px;
+    transition: all 0.3s;
   }
-  .branch.clickable { cursor: pointer; }
-  .branch.clickable:hover {
+  .mod-card.clickable { cursor: pointer; }
+  .mod-card.clickable:hover {
     background: rgba(255,255,255,0.05);
     border-color: rgba(255,255,255,0.1);
-    z-index: 20;
   }
-  .branch .br-icon { font-size: 15px; margin-bottom: 3px; }
-  .branch .br-label { font-size: 10px; letter-spacing: 2px; color: #5a5a72; margin-bottom: 2px; }
-  .branch .br-content { font-size: 11px; color: #6a6a82; line-height: 1.4; }
+  .mod-card .mc-icon { font-size: 18px; margin-bottom: 6px; }
+  .mod-card .mc-label { font-size: 10px; letter-spacing: 2px; color: #5a5a72; margin-bottom: 4px; }
+  .mod-card .mc-content { font-size: 12px; color: #7878a0; line-height: 1.4; }
 
-  .br-status  { top: 4%; left: 50%; transform: translate(-50%,0); text-align: center; }
-  .br-quote   { top: 16%; left: 50%; transform: translate(-50%,0); text-align: center; max-width: 340px; }
-  .br-game    { top: 28%; right: 3%; }
-  .br-about   { top: 28%; left: 3%; }
-  .br-rain    { bottom: 20%; left: 50%; transform: translate(-50%,0); text-align: center; }
-  .br-play    { bottom: 28%; right: 3%; }
-  .br-chat    { bottom: 5%; right: 3%; width: 200px; }
-  .br-guest   { bottom: 5%; left: 3%; width: 200px; }
-
-  /* ═══════════ 弹窗 ═══════════ */
-  .modal-overlay {
-    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.55); z-index: 50;
-    justify-content: center; align-items: center;
+  /* ═══════════ 第二页：链接页 ═══════════ */
+  .links-page {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 85;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; visibility: hidden; transition: all 0.5s;
   }
-  .modal-overlay.show { display: flex; }
-  .modal {
-    background: #12121e; border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 20px; padding: 28px; width: 400px; max-width: 92vw;
-    max-height: 75vh; overflow-y: auto; position: relative;
-  }
-  .modal-close {
-    position: absolute; top: 14px; right: 18px;
-    background: transparent; border: none; color: #5a5a72; font-size: 20px; cursor: pointer;
-  }
-  .modal-close:hover { color: #a0a0b8; }
-  .modal-title { font-size: 12px; letter-spacing: 3px; color: #48485c; margin-bottom: 16px; }
+  .links-page.visible { opacity: 1; visibility: visible; }
 
-  .chat-msgs { max-height: 260px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; font-size: 13px; }
-  .chat-msgs::-webkit-scrollbar { width: 3px; }
-  .chat-msgs::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.05); border-radius: 2px; }
-  .m-user { align-self: flex-end; padding: 8px 12px; border-radius: 10px; background: rgba(255,255,255,0.05); color: #b0b0c8; max-width: 80%; }
-  .m-ymj  { align-self: flex-start; padding: 8px 12px; border-radius: 10px; background: rgba(255,255,255,0.025); color: #9090a8; max-width: 80%; }
-  .chat-row { display: flex; gap: 8px; }
-  .chat-row input { flex: 1; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 10px; padding: 10px; color: #c0c0d8; font-size: 13px; outline: none; font-family: inherit; }
-  .chat-row input::placeholder { color: #3c3c52; }
-  .chat-row button { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.05); border-radius: 10px; color: #6a6a80; padding: 10px 16px; cursor: pointer; font-size: 13px; }
-
-  .gb-list { max-height: 200px; overflow-y: auto; margin-bottom: 14px; }
-  .gb-item { padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 12px; color: #6a6a80; }
-  .gb-time { font-size: 10px; color: #33334a; margin-bottom: 2px; }
-  .gb-form { display: flex; gap: 8px; }
-  .gb-form input { flex: 1; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 10px; padding: 10px; color: #b0b0c8; font-size: 12px; outline: none; font-family: inherit; }
-  .gb-form input::placeholder { color: #33334a; }
-  .gb-form button { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.05); border-radius: 10px; color: #6a6a80; padding: 10px 16px; cursor: pointer; font-size: 12px; }
-
-  .about-text { font-size: 12px; color: #6a6a80; line-height: 1.8; }
-  .about-text p { margin-bottom: 8px; }
-  .tag { display: inline-block; padding: 4px 10px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.04); font-size: 11px; color: #787898; margin: 2px 4px 2px 0; }
-
-  .rain-slider {
-    -webkit-appearance: none; width: 80px; height: 2px;
-    background: rgba(255,255,255,0.08); border-radius: 1px; outline: none; margin-top: 6px;
+  .links-container {
+    width: 340px; max-width: 90vw;
+    display: flex; flex-direction: column; gap: 8px;
   }
-  .rain-slider::-webkit-slider-thumb {
-    -webkit-appearance: none; width: 10px; height: 10px;
-    background: #5a5a7a; border-radius: 50%; cursor: pointer;
+  .link-card {
+    display: flex; align-items: center; gap: 14px;
+    padding: 15px 20px; border-radius: 14px;
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(255,255,255,0.04);
+    text-decoration: none; color: #b0b0c8;
+    font-size: 14px; letter-spacing: 0.5px;
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    transition: all 0.25s;
   }
+  .link-card:hover {
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(255,255,255,0.1);
+    color: #d0d0e0;
+  }
+  .link-card .lc-icon { font-size: 20px; width: 28px; text-align: center; }
+  .link-card .lc-arrow { margin-left: auto; color: #33334a; font-size: 13px; }
+  .back-link {
+    color: #48485c; font-size: 12px; letter-spacing: 2px;
+    cursor: pointer; text-align: center; margin-top: 20px;
+    transition: color 0.3s;
+  }
+  .back-link:hover { color: #8a8aa2; }
+
+  /* ── 播放器内嵌 ── */
+  .player-inline {
+    display: flex; align-items: center; gap: 8px;
+  }
+  .player-btn {
+    background: transparent; border: none; color: #5a5a72;
+    font-size: 14px; cursor: pointer; padding: 4px;
+    transition: color 0.2s;
+  }
+  .player-btn:hover { color: #a0a0b8; }
 
   @media (max-width: 600px) {
-    .branch { max-width: 150px; padding: 10px 12px; }
-    .br-game { right: 1%; top: 26%; }
-    .br-about { left: 1%; top: 26%; }
-    .br-chat { right: 1%; bottom: 8%; width: 150px; }
-    .br-guest { left: 1%; bottom: 8%; width: 150px; }
-    .center .avatar { width: 52px; height: 52px; }
-    .center .name { font-size: 16px; }
+    .header { top: 24px; left: 20px; }
+    .modules { bottom: 20px; left: 20px; right: 20px; flex-direction: column; }
+    .mod-card { min-width: auto; }
   }
 </style>
 </head>
 <body>
 <canvas id="bg"></canvas>
 
-<!-- ═══════════ 主页 — 极简 ═══════════ -->
-<div class="page" id="pageHome">
-  <div class="home-content">
-    <img class="avatar" src="YMJ.jpg" alt="YMJ">
-    <div class="name">YMJ</div>
-    <button class="enter-btn" onclick="goToMain()">进 入</button>
-  </div>
+<!-- ═══════════ 加载页 ═══════════ -->
+<div class="loading" id="loading">
+  <div class="loading-bar"><div class="loading-bar-fill" id="loadFill"></div></div>
 </div>
 
-<!-- ═══════════ 第二页 — 全部模块 ═══════════ -->
-<div class="page hidden" id="pageMain">
-  <button class="back-btn" onclick="goHome()">← 返回</button>
-  <div class="stage">
-    <div class="center">
-      <img class="avatar" src="YMJ.jpg" alt="YMJ">
-      <div class="name">YMJ</div>
+<!-- ═══════════ 动画阶段：头像居中 ═══════════ -->
+<div class="center-stage" id="centerStage" style="opacity:0">
+  <img class="avatar-big" src="YMJ.jpg" alt="YMJ">
+  <div class="name-big">YMJ</div>
+</div>
+
+<!-- ═══════════ 主页 ═══════════ -->
+<div class="main-page" id="mainPage">
+  <div class="header">
+    <img class="avatar-sm" src="YMJ.jpg" alt="YMJ">
+    <span class="name-sm">YMJ</span>
+  </div>
+
+  <div class="modules">
+    <div class="mod-card clickable" onclick="togglePlay()">
+      <div class="mc-icon">🎵</div>
+      <div class="mc-label">正在播放</div>
+      <div class="mc-content" id="playLabel">Lofi · 点击播放</div>
     </div>
 
-    <div class="branch br-status">
-      <div class="br-icon">☁️</div><div class="br-label">状态</div>
-      <div class="br-content">今天也没说什么话，挺好的。</div>
+    <div class="mod-card">
+      <div class="mc-icon">☁️</div>
+      <div class="mc-label">状态</div>
+      <div class="mc-content">今天也没说什么话，挺好的。</div>
     </div>
 
-    <div class="branch br-quote">
-      <div class="br-label">「</div>
-      <div class="br-content" id="quoteText">就这样吧，淡淡的走。</div>
+    <div class="mod-card">
+      <div class="mc-icon">🎮</div>
+      <div class="mc-label">正在玩</div>
+      <div class="mc-content">PC 端游，随便打打</div>
     </div>
 
-    <div class="branch br-game">
-      <div class="br-icon">🎮</div><div class="br-label">正在玩</div>
-      <div class="br-content">PC 端游，随便打打</div>
-    </div>
-
-    <div class="branch br-about clickable" onclick="openModal('about')">
-      <div class="br-icon">📋</div><div class="br-label">关于我</div>
-      <div class="br-content">了解 YMJ</div>
-    </div>
-
-    <div class="branch br-rain">
-      <div class="br-icon">🌧</div><div class="br-label">雨量</div>
-      <input type="range" class="rain-slider" min="0" max="100" value="70" oninput="setRain(this.value)">
-    </div>
-
-    <div class="branch br-play clickable" onclick="togglePlay()">
-      <div class="br-icon">🎵</div><div class="br-label">Lofi</div>
-      <div class="br-content" id="playLabel">▶ 播放</div>
-    </div>
-
-    <div class="branch br-chat clickable" onclick="openModal('chat')">
-      <div class="br-icon">💬</div><div class="br-label">聊 天</div>
-      <div class="br-content">跟 YMJ 说点什么…</div>
-    </div>
-
-    <div class="branch br-guest clickable" onclick="openModal('guest')">
-      <div class="br-icon">📝</div><div class="br-label">留 言</div>
-      <div class="br-content">想说点什么…</div>
+    <div class="mod-card clickable" onclick="goLinks()">
+      <div class="mc-icon">🔗</div>
+      <div class="mc-label">找到我</div>
+      <div class="mc-content">各平台 →</div>
     </div>
   </div>
 </div>
 
-<!-- ═══════════ 弹窗 ═══════════ -->
-<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
-  <div class="modal" id="modalChat" style="display:none">
-    <button class="modal-close" onclick="closeModal()">✕</button>
-    <div class="modal-title">跟 YMJ 聊天</div>
-    <div class="chat-msgs" id="chatMsgs"><div class="m-ymj">……<br>你来了。</div></div>
-    <div class="chat-row">
-      <input id="chatInput" placeholder="说点什么..." onkeydown="if(event.key==='Enter')sendMsg()">
-      <button onclick="sendMsg()">发送</button>
+<!-- ═══════════ 第二页：链接 ═══════════ -->
+<div class="links-page" id="linksPage">
+  <div>
+    <div class="links-container">
+      <a href="#" class="link-card"><span class="lc-icon">🎵</span>抖音<span class="lc-arrow">→</span></a>
+      <a href="#" class="link-card"><span class="lc-icon">📺</span>Bilibili<span class="lc-arrow">→</span></a>
+      <a href="#" class="link-card"><span class="lc-icon">📕</span>小红书<span class="lc-arrow">→</span></a>
+      <a href="#" class="link-card"><span class="lc-icon">📷</span>Instagram<span class="lc-arrow">→</span></a>
+      <a href="#" class="link-card"><span class="lc-icon">🐦</span>Twitter / X<span class="lc-arrow">→</span></a>
+      <a href="#" class="link-card"><span class="lc-icon">💼</span>LinkedIn<span class="lc-arrow">→</span></a>
+      <a href="#" class="link-card"><span class="lc-icon">🐙</span>GitHub<span class="lc-arrow">→</span></a>
+      <a href="#" class="link-card"><span class="lc-icon">🎧</span>网易云音乐<span class="lc-arrow">→</span></a>
     </div>
-  </div>
-  <div class="modal" id="modalGuest" style="display:none">
-    <button class="modal-close" onclick="closeModal()">✕</button>
-    <div class="modal-title">留言板</div>
-    <div class="gb-list" id="gbList">
-      <div class="gb-item"><div class="gb-time">路过的人</div>雨很好看。</div>
-      <div class="gb-item"><div class="gb-time">匿名</div>我也是 INFP。看到你的网站觉得好安静。</div>
-    </div>
-    <div class="gb-form">
-      <input id="gbInput" placeholder="想说点什么..." onkeydown="if(event.key==='Enter')postMsg()">
-      <button onclick="postMsg()">留 言</button>
-    </div>
-  </div>
-  <div class="modal" id="modalAbout" style="display:none">
-    <button class="modal-close" onclick="closeModal()">✕</button>
-    <div class="modal-title">关于 YMJ</div>
-    <div class="about-text">
-      <p>2003年出生，INFP。住在宁波杭州湾，心里有南京。</p>
-      <p>端游玩家。想去日本。会跟着教程做饭。</p>
-      <p>童年最好的记忆是老家的暴雨天，在屋檐下玩。</p>
-      <p>看起来平静，实际上也平静。只是偶尔会偷偷哭。</p>
-      <p>如果世界末日——就这样吧，淡淡的走。</p>
-      <div><span class="tag">INFP</span><span class="tag">念旧</span><span class="tag">失眠</span><span class="tag">端游</span><span class="tag">雨天</span><span class="tag">独处</span><span class="tag">南京</span><span class="tag">日本</span></div>
-    </div>
+    <div class="back-link" onclick="goMain()">← 返回</div>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.min.js"></script>
 <script>
-// ═══════════ 页面切换 ═══════════
-function goToMain() {
-  document.getElementById('pageHome').classList.add('hidden');
-  document.getElementById('pageMain').classList.remove('hidden');
-}
-function goHome() {
-  document.getElementById('pageMain').classList.add('hidden');
-  document.getElementById('pageHome').classList.remove('hidden');
-}
-
-// ═══════════ 背景 ═══════════
+// ═══════════ 背景：云 + 雨 ═══════════
 const bgC=document.getElementById('bg'),ctx=bgC.getContext('2d');
-let w,h,rainI=0.7,targetR=0.7;
+let w,h,rainI=0.7;
 function resize(){w=bgC.width=innerWidth;h=bgC.height=innerHeight}
 resize();addEventListener('resize',resize);
-
 class Cloud{
   constructor(){this.reset(true)}
   reset(init){this.x=init?Math.random()*w:w+200;this.y=Math.random()*h*.35;this.w=100+Math.random()*180;this.h=30+Math.random()*50;this.speed=.1+Math.random()*.3;this.a=.02+Math.random()*.05}
@@ -284,26 +230,50 @@ class RainDrop{
   draw(){if(rainI<0.01)return;ctx.strokeStyle=`rgba(150,175,205,${this.a_})`;ctx.lineWidth=this.w_;ctx.beginPath();ctx.moveTo(this.x,this.y);ctx.lineTo(this.x+this.dx,this.y+this.dy);ctx.stroke()}
 }
 const clouds=Array.from({length:10},()=>new Cloud),allRain=Array.from({length:200},()=>new RainDrop);
-(function L(){rainI+=(targetR-rainI)*0.05;ctx.clearRect(0,0,w,h);clouds.forEach(c=>{c.update();c.draw()});allRain.forEach(r=>{r.update();r.draw()});requestAnimationFrame(L)})();
-function setRain(v){targetR=v/100}
+(function L(){ctx.clearRect(0,0,w,h);clouds.forEach(c=>{c.update();c.draw()});allRain.forEach(r=>{r.update();r.draw()});requestAnimationFrame(L)})();
 
-// ═══════════ 语录 ═══════════
-const Q=['就这样吧，淡淡的走。','还没死呢？','长大就是累。','等待他人是最浪费时间的事。','我需要安静舒适的环境。','装的人一秒都不想理。','吧唧嘴……像猪一样。','老家暴雨天最凉快了。','什么都不想说的时候就别说。','被人需要大概就是意义。','别问我最近怎么样，看人。','不是冲动，是没有那回事。'];
-let qi=0;(function nq(){qi=(qi+1+Math.floor(Math.random()*(Q.length-1)))%Q.length;document.getElementById('quoteText').textContent=Q[qi];setTimeout(nq,8000+Math.random()*6000)})();
+// ═══════════ 入场动画 ═══════════
+window.addEventListener('load', () => {
+  const loadFill = document.getElementById('loadFill');
+  const loading = document.getElementById('loading');
+  const stage = document.getElementById('centerStage');
+  const main = document.getElementById('mainPage');
 
-// ═══════════ 弹窗 ═══════════
-function openModal(t){document.getElementById('modalOverlay').classList.add('show');document.getElementById('modalChat').style.display=t==='chat'?'block':'none';document.getElementById('modalGuest').style.display=t==='guest'?'block':'none';document.getElementById('modalAbout').style.display=t==='about'?'block':'none'}
-function closeModal(){document.getElementById('modalOverlay').classList.remove('show')}
+  // 1. 加载条
+  setTimeout(() => loadFill.classList.add('active'), 200);
 
-// ═══════════ AI ═══════════
-function YR(m){const s=m.toLowerCase().trim();if(/你好|嗨|hi/.test(s))return'嗯。';if(/你是谁|你是ymj/.test(s))return'我是 YMJ。';if(/天气|下雨|雨/.test(s))return'我喜欢雨。小时候老家下暴雨，在屋檐下玩，很凉快。';if(/游戏|玩什么|端游/.test(s))return'端游。随便打打。';if(/南京/.test(s))return'我想回去。';if(/生日/.test(s))return'7月24。';if(/几岁|多大/.test(s))return'快 23 了。';if(/mbti|infp/.test(s))return'INFP。';if(/吃|饿|做饭/.test(s))return'会做一点，跟着教程做，不会难吃。';if(/困|累|睡觉/.test(s))return'累了就睡，硬熬没意义。';if(/喜欢|爱/.test(s))return'……不说这个。';if(/哭|伤心/.test(s))return'哭就哭了，没什么。';if(/朋友/.test(s))return'少一点也好。';if(/末日/.test(s))return'就这样吧，淡淡的走。';if(/日本/.test(s))return'想去，还没去。';if(/讨厌|烦/.test(s))return'装的人最烦。还有吧唧嘴。';if(/谢谢/.test(s))return'不用。';if(/安静|舒服/.test(s))return'安静的环境最能恢复。';if(/孤独|一个人/.test(s))return'习惯了。';if(/长大/.test(s))return'累。';if(/杭州湾|宁波/.test(s))return'嗯，在杭州湾。';if(/温柔/.test(s))return'看对谁。';if(/抽烟/.test(s))return'高中开始的，戒不戒无所谓。';if(/恋爱|对象|前任/.test(s))return'不说这个。';const D=['……','嗯。','不知道说什么。','就这样吧。','随便。','你话还挺多的。'];return D[Math.floor(Math.random()*D.length)]}
-function sendMsg(){const i=document.getElementById('chatInput'),m=i.value.trim();if(!m)return;const c=document.getElementById('chatMsgs');c.innerHTML+=`<div class="m-user">${m}</div>`;i.value='';setTimeout(()=>{c.innerHTML+=`<div class="m-ymj">${YR(m)}</div>`;c.scrollTop=c.scrollHeight},600+Math.random()*1200);c.scrollTop=c.scrollHeight}
+  // 2. 加载完成 → 头像出现
+  setTimeout(() => {
+    loading.classList.add('done');
+    stage.style.transition = 'opacity 0.8s ease';
+    stage.style.opacity = '1';
+  }, 1600);
 
-// ═══════════ 留言 ═══════════
-function postMsg(){const i=document.getElementById('gbInput'),m=i.value.trim();if(!m)return;const bl=['广告','加微信','赚钱','代理','合作','扫码','http','www','免费','兼职','刷单','联系我','私聊','VX','vx','➕'];if(bl.some(w=>m.includes(w))){alert('发不出去。');return}const n=new Date();document.getElementById('gbList').innerHTML+=`<div class="gb-item"><div class="gb-time">${n.getMonth()+1}.${n.getDate()} ${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}</div>${m}</div>`;i.value=''}
+  // 3. 停留 → 溶解消失
+  setTimeout(() => {
+    stage.classList.add('dissolve');
+  }, 3000);
+
+  // 4. 溶解完成 → 主页出现（头像在左上）
+  setTimeout(() => {
+    stage.style.display = 'none';
+    main.classList.add('visible');
+  }, 3900);
+});
+
+// ═══════════ 页面切换 ═══════════
+function goLinks() {
+  document.getElementById('mainPage').classList.remove('visible');
+  document.getElementById('linksPage').classList.add('visible');
+}
+function goMain() {
+  document.getElementById('linksPage').classList.remove('visible');
+  document.getElementById('mainPage').classList.add('visible');
+}
 
 // ═══════════ Lofi ═══════════
-let playing=false,synth;function togglePlay(){const lb=document.getElementById('playLabel');if(!playing){lb.textContent='⏸ 暂停';if(!synth)synth=new Tone.PolySynth(Tone.Synth,{volume:-20,oscillator:{type:'sine'},envelope:{attack:.8,decay:.3,sustain:.4,release:1.5}}).toDestination();Tone.start();const N=['C4','E4','G4','A4','C5','D5','E5','G5'];synth._lp=new Tone.Loop(t=>{if(!playing)return;synth.triggerAttackRelease(N[Math.floor(Math.random()*N.length)],'4n',t,.15+Math.random()*.1)},'2n').start(0);Tone.Transport.start();playing=true}else{lb.textContent='▶ 播放';if(synth._lp)synth._lp.stop();Tone.Transport.stop();playing=false}}
+let playing=false,synth;
+function togglePlay(){const lb=document.getElementById('playLabel');if(!playing){lb.textContent='Lofi · 播放中';if(!synth)synth=new Tone.PolySynth(Tone.Synth,{volume:-20,oscillator:{type:'sine'},envelope:{attack:.8,decay:.3,sustain:.4,release:1.5}}).toDestination();Tone.start();const N=['C4','E4','G4','A4','C5','D5','E5','G5'];synth._lp=new Tone.Loop(t=>{if(!playing)return;synth.triggerAttackRelease(N[Math.floor(Math.random()*N.length)],'4n',t,.15+Math.random()*.1)},'2n').start(0);Tone.Transport.start();playing=true}else{lb.textContent='Lofi · 点击播放';if(synth._lp)synth._lp.stop();Tone.Transport.stop();playing=false}}
 </script>
 </body>
 </html>
