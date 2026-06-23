@@ -71,13 +71,17 @@
 
   /* ══════ 网易云 iframe ══════ */
   .netease-wrap {
-    position: absolute; bottom: 40px; right: 32px;
-    border-radius: 14px; overflow: hidden;
+    position: absolute; top: 36px; right: 32px;
+    display: flex; align-items: center; gap: 6px;
+    padding: 10px 16px;
+    background: rgba(255,255,255,0.022);
     border: 1px solid rgba(255,255,255,0.04);
-    opacity: 0.6; transition: opacity 0.3s;
+    border-radius: 14px;
+    text-decoration: none;
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    transition: all 0.3s;
   }
-  .netease-wrap:hover { opacity: 1; }
-  .netease-wrap iframe { display: block; }
+  .netease-wrap:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
 
   /* ══════ 链接页 ══════ */
   .links-page {
@@ -132,10 +136,10 @@
     <span class="name-sm">YMJ</span>
   </div>
 
-  <!-- 网易云跳转按钮 — 右下角 -->
+  <!-- 网易云跳转按钮 — 右上角 -->
   <a class="netease-wrap" id="neteasePlayer" href="https://music.163.com/#/playlist?id=5379870137" target="_blank">
-    <span style="font-size:14px;margin-right:6px;">🎧</span>
-    <span style="font-size:11px;letter-spacing:1px;color:#7878a0;">网易云歌单 →</span>
+    <span style="font-size:14px;">🎧</span>
+    <span style="font-size:11px;letter-spacing:1px;color:#7878a0;">网易云 →</span>
   </a>
 
   <div class="modules">
