@@ -15,7 +15,6 @@
   }
   canvas#bg { position: fixed; top: 0; left: 0; z-index: 0; pointer-events: none; }
 
-  /* ══════ 加载 ══════ */
   .loading {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 100;
     display: flex; align-items: center; justify-content: center;
@@ -26,7 +25,6 @@
   .loading-bar-fill { width: 0%; height: 100%; background: rgba(180,180,210,0.4); transition: width 1.2s cubic-bezier(0.25,0.46,0.45,0.94); }
   .loading-bar-fill.active { width: 100%; }
 
-  /* ══════ 动画：居中 ══════ */
   .center-stage {
     position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
     text-align: center; z-index: 90; transition: all 1s cubic-bezier(0.4,0,0.2,1);
@@ -37,7 +35,6 @@
   .avatar-big { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 20px; border: 1.5px solid rgba(255,255,255,0.06); background: #1a1a28; }
   .name-big { font-size: 28px; font-weight: 600; color: #e8e8f4; letter-spacing: 6px; }
 
-  /* ══════ 主页 ══════ */
   .main-page {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 80;
     opacity: 0; transition: opacity 0.6s 0.3s; pointer-events: none;
@@ -53,10 +50,10 @@
 
   .modules {
     position: absolute; bottom: 40px; left: 32px; right: 32px;
-    display: flex; gap: 12px; flex-wrap: wrap;
+    display: flex; gap: 12px;
   }
   .mod-card {
-    flex: 1; min-width: 140px;
+    flex: 1;
     background: rgba(255,255,255,0.022);
     border: 1px solid rgba(255,255,255,0.04);
     border-radius: 14px; padding: 18px;
@@ -69,21 +66,6 @@
   .mod-card .mc-label { font-size: 10px; letter-spacing: 2px; color: #5a5a72; margin-bottom: 4px; }
   .mod-card .mc-content { font-size: 12px; color: #7878a0; line-height: 1.4; }
 
-  /* ══════ 网易云 iframe ══════ */
-  .netease-wrap {
-    position: absolute; top: 36px; right: 32px;
-    display: flex; align-items: center; gap: 6px;
-    padding: 10px 16px;
-    background: rgba(255,255,255,0.022);
-    border: 1px solid rgba(255,255,255,0.04);
-    border-radius: 14px;
-    text-decoration: none;
-    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-    transition: all 0.3s;
-  }
-  .netease-wrap:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
-
-  /* ══════ 链接页 ══════ */
   .links-page {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 85;
     display: flex; align-items: center; justify-content: center;
@@ -110,43 +92,32 @@
   @media (max-width: 600px) {
     .header { top: 24px; left: 20px; }
     .modules { bottom: 24px; left: 20px; right: 20px; flex-direction: column; }
-    .mod-card { min-width: auto; }
-    .netease-wrap { position: static; margin: 12px 0 0; }
   }
 </style>
 </head>
 <body>
 <canvas id="bg"></canvas>
 
-<!-- ══════ 加载 ══════ -->
 <div class="loading" id="loading">
   <div class="loading-bar"><div class="loading-bar-fill" id="loadFill"></div></div>
 </div>
 
-<!-- ══════ 动画：居中 ══════ -->
 <div class="center-stage init" id="centerStage">
   <img class="avatar-big" src="YMJ.jpg" alt="YMJ">
   <div class="name-big">YMJ</div>
 </div>
 
-<!-- ══════ 主页 ══════ -->
 <div class="main-page" id="mainPage">
   <div class="header">
     <img class="avatar-sm" src="YMJ.jpg" alt="YMJ">
     <span class="name-sm">YMJ</span>
   </div>
 
-  <!-- 网易云跳转按钮 — 右上角 -->
-  <a class="netease-wrap" id="neteasePlayer" href="https://music.163.com/#/playlist?id=5379870137" target="_blank">
-    <span style="font-size:14px;">🎧</span>
-    <span style="font-size:11px;letter-spacing:1px;color:#7878a0;">网易云 →</span>
-  </a>
-
   <div class="modules">
     <div class="mod-card">
       <div class="mc-icon">☁️</div>
       <div class="mc-label">状态</div>
-      <div class="mc-content" id="statusText">—</div>
+      <div class="mc-content">—</div>
     </div>
     <div class="mod-card clickable" onclick="goLinks()">
       <div class="mc-icon">🔗</div>
@@ -156,7 +127,6 @@
   </div>
 </div>
 
-<!-- ══════ 链接页 ══════ -->
 <div class="links-page" id="linksPage">
   <div>
     <div class="links-container">
@@ -191,6 +161,41 @@ class RainDrop{
 const clouds=Array.from({length:10},()=>new Cloud),allRain=Array.from({length:200},()=>new RainDrop);
 (function L(){ctx.clearRect(0,0,w,h);clouds.forEach(c=>{c.update();c.draw()});allRain.forEach(r=>{r.update();r.draw()});requestAnimationFrame(L)})();
 
+// ═══════════ 雨声音频 ═══════════
+let rainAudio=null,rainPlaying=false;
+function startRainSound() {
+  if (rainPlaying) return;
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  // 创建雨声：多层噪声 + 滤波
+  function createRainLayer(type, low, high, vol) {
+    const buf = audioCtx.createBuffer(1, audioCtx.sampleRate * 2, audioCtx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * vol;
+    const src = audioCtx.createBufferSource();
+    src.buffer = buf; src.loop = true;
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = 'bandpass'; filter.frequency.value = (low + high) / 2;
+    filter.Q.value = (low + high) / 2 / (high - low);
+    const gain = audioCtx.createGain();
+    gain.gain.value = vol * 0.15;
+    src.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
+    src.start();
+    return { src, filter, gain };
+  }
+
+  // 低频（远处闷雷/大雨背景）
+  createRainLayer('brown', 80, 400, 1.0);
+  // 中频（雨滴声主体）
+  createRainLayer('pink', 300, 2000, 0.7);
+  // 高频（细密雨声）
+  createRainLayer('white', 1500, 6000, 0.35);
+  // 低频滴答
+  createRainLayer('brown', 40, 200, 0.5);
+
+  rainPlaying = true;
+}
+
 // ═══════════ 入场动画 ═══════════
 window.addEventListener('load',()=>{
   const lf=document.getElementById('loadFill');
@@ -199,16 +204,12 @@ window.addEventListener('load',()=>{
   const mp=document.getElementById('mainPage');
   setTimeout(()=>lf.classList.add('active'),200);
   setTimeout(()=>{ld.classList.add('done');st.classList.remove('init');st.style.transition='opacity 0.8s ease';st.style.opacity='1'},1600);
-  setTimeout(()=>st.classList.add('dissolve'),3000);
+  setTimeout(()=>{st.classList.add('dissolve');startRainSound()},3000);
   setTimeout(()=>{st.style.display='none';mp.classList.add('visible')},3900);
 });
 
-// ═══════════ 页面切换 ═══════════
 function goLinks(){document.getElementById('mainPage').classList.remove('visible');document.getElementById('linksPage').classList.add('visible')}
 function goMain(){document.getElementById('linksPage').classList.remove('visible');document.getElementById('mainPage').classList.add('visible')}
-
-// ═══════════ 网易云链接 ═══════════
-document.getElementById('neteaseLink').href = 'https://music.163.com/#/user/home?id=4007440679';
 </script>
 </body>
 </html>
